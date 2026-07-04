@@ -37,7 +37,7 @@ export default function NoteForm({onClose}: NoteFormProps) {
   const queryClient = useQueryClient();
   const { mutate,isPending } = useMutation({
     mutationFn: createNote,
-    onSuccess: () => {queryClient.invalidateQueries({ queryKey: ["notes"] }); onClose()},
+    onSuccess: () => {queryClient.invalidateQueries({ queryKey: ["notes"] });},
     onError: () => {toast.error("Failed to create note. Please try again.");},
   });
 
@@ -45,7 +45,7 @@ export default function NoteForm({onClose}: NoteFormProps) {
     values: NoteFormValues,
     actions: FormikHelpers<NoteFormValues>,
   ) => {
-    mutate(values, { onSuccess: () => actions.resetForm() });
+    mutate(values, { onSuccess: () => {actions.resetForm(); onClose()} });
   };
   
   return (
@@ -88,7 +88,7 @@ export default function NoteForm({onClose}: NoteFormProps) {
         </div>
 
         <div className={css.actions}>
-          <button type="reset" className={css.cancelButton}  onClick={onClose}>
+          <button type="button" className={css.cancelButton}  onClick={onClose}>
             Cancel
           </button>
           <button type="submit" className={css.submitButton} disabled={isPending}>
