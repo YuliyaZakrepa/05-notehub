@@ -7,21 +7,14 @@ import Loader from "../Loader/Loader";
 import Modal from "../Modal/Modal";
 import NoteForm from "../NoteForm/NoteForm";
 import SearchBox from "../SearchBox/SearchBox";
+import Pagination from "../Pagination/Pagination";
 import { fetchNotes } from "../../services/noteService";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import toast, { Toaster } from "react-hot-toast";
 
-import ReactPaginateModule from "react-paginate";
-import type { ReactPaginateProps } from "react-paginate";
-import type { ComponentType } from "react";
-type ModuleWithDefault<T> = { default: T };
-const ReactPaginate = (
-  ReactPaginateModule as unknown as ModuleWithDefault<
-    ComponentType<ReactPaginateProps>
-  >
-).default;
+
 
 export default function App() {
   const [search, setSearch] = useState<string | "">("");
@@ -50,6 +43,7 @@ export default function App() {
   useEffect(() => {
     if (isSuccess && notes.length === 0 && !isFetching && search.trim() !== "") {
       toast.error("No notes found for your request.");
+     
     }
   }, [isSuccess, notes, isFetching, search]);
  
@@ -59,32 +53,26 @@ export default function App() {
       <header className={css.toolbar}>
         {<SearchBox onSearch={handleSearch} />}
         {isSuccess && totalPages > 1 && (
-          <ReactPaginate
-            pageCount={totalPages}
-            pageRangeDisplayed={5}
-            marginPagesDisplayed={1}
-            onPageChange={({ selected }) => setPage(selected + 1)}
-            forcePage={page - 1}
-            containerClassName={css.pagination}
-            activeClassName={css.active}
-            nextLabel="→"
-            previousLabel="←"
-          />
+          <Pagination 
+          totalPages={totalPages}
+          page={page}
+          onPageChange={setPage}/>
         )}
 
         <button className={css.button} onClick={handleOpenModal}>
           Create note +
         </button>
       </header>
+      <div>
       {isFetching && <Loader />}
       {isError && <ErrorMessage />}
-      {isModalOpen && (
+      {isSuccess && notes.length > 0 && <NoteList notes={notes} />}
+      </div>
+       {isModalOpen && (
         <Modal onClose={handleCloseModal}>
           {<NoteForm onClose={handleCloseModal} />}
         </Modal>
       )}
-
-      {isSuccess && notes.length > 0 && <NoteList notes={notes} />}
     </div>
   );
 }
